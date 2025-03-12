@@ -18,6 +18,10 @@ MODULE_VERSION("0.1");
 
 static ssize_t slab_size;
 static struct kmem_cache *slab_ptr;
+static void local_mem_init(void *obj)
+{
+	memset(obj, 0, slab_size);
+};
 
 static int __init show_slab_creation_init(void)
 {
@@ -27,8 +31,16 @@ static int __init show_slab_creation_init(void)
 	pr_info("Inserted\n");
 
 	// Create local SLAB
-	slab_size = 1024 * 1024;
-	slab_ptr = kmem_cache_create("my_slab", slab_size, 0, SLAB_PANIC, NULL);
+	slab_size = 32;		// This is size of each new object requested from my_slab
+	slab_ptr = kmem_cache_create("my_slab", slab_size, 0,
+				     // Usually you passes 0 here for no special fetures
+				     // SLAB_POISON sets all values to 0x5f5f5 so we can
+				     // trace uninitialized values easier. For more info
+				     // look on mm/slab_common.c.
+				     SLAB_POISON,
+				     // This is init function for each new memory allocated
+				     // from SLAB.
+				     local_mem_init);
 	if (!slab_ptr) {
 		err = -ENOMEM;
 		goto cleanup;
