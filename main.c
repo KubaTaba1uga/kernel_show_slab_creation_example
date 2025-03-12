@@ -16,10 +16,14 @@ MODULE_DESCRIPTION("a simple LKM showing local SLAB creation");
 MODULE_LICENSE("Dual MIT/GPL");
 MODULE_VERSION("0.1");
 
+static int counter = 0;
 static ssize_t slab_size;
 static struct kmem_cache *slab_ptr;
 static void local_mem_init(void *obj)
 {
+	// SLAB allocates more memory than required for performance reasons.
+	// That's why this msg is printed multiple times.
+	pr_info("%d:Created new memory\n", counter++);
 	memset(obj, 0, slab_size);
 };
 
@@ -28,7 +32,7 @@ static int __init show_slab_creation_init(void)
 	char *buf;
 	int err;
 
-	pr_info("Inserted\n");
+	pr_info("Creating my_slab...\n");
 
 	// Create local SLAB
 	slab_size = 32;		// This is size of each new object requested from my_slab
@@ -45,6 +49,9 @@ static int __init show_slab_creation_init(void)
 		err = -ENOMEM;
 		goto cleanup;
 	}
+
+	pr_info("my_slab created, creating buf...\n");
+
 	// Allocate some memory from local SLAB
 	buf = kmem_cache_alloc(slab_ptr, GFP_KERNEL);
 	if (!buf) {
