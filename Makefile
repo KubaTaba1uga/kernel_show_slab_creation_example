@@ -1,4 +1,4 @@
-FNAME_C ?= show_slab_allocator
+FNAME_C ?= show_slab_creation
 ifeq ($(FNAME_C),)
   $(error ERROR: you Must pass the C file like this: \
   make FNAME_C=csrc-filename-without-.c target-name)
@@ -14,7 +14,7 @@ STRIP := ${CROSS_COMPILE}strip
 
 PWD            := $(shell pwd)
 obj-m          += ${FNAME_C}.o
-show_slab_allocator-objs := main.o
+show_slab_creation-objs := main.o
 
 MYDEBUG ?= n
 DBG_STRIP := y
